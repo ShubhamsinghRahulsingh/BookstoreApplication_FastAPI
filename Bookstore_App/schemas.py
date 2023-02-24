@@ -23,3 +23,23 @@ class ShowUser(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserLogin(BaseModel):
+    user_name: str
+    password: str
+
+    class Config:
+        orm_mode = True
+
+
+class Book(BaseModel):
+    id: int | None
+    author: str
+    title: str
+    price: int
+    quantity: int
+    user_id: int | None
+
+    class Config:
+        orm_mode = True

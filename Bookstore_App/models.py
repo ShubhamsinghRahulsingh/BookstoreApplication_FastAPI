@@ -22,6 +22,10 @@ class User(Base):
     password = Column(String)
     is_super_user = Column(Boolean, default=False)
 
+    @property
+    def auth_payload(self):
+        return {"user_name": self.user_name, "password": self.password}
+
 
 class Book(Base):
     __tablename__ = "book"
