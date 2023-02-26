@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Response, Request, status
 import hashlib
 from Bookstore_App import models, schemas, database, utils
 
-routers = APIRouter(tags=["Users"])
+routers = APIRouter(tags=["User"])
 
 
 @routers.post('/register', response_model=schemas.ShowUser)
@@ -30,8 +30,8 @@ def user_login(details: schemas.UserLogin, response: Response, db: Session = Dep
     if data:
         input_password = hashlib.md5(details.password.encode('utf-8')).hexdigest()
         if input_password == data.password:
-            session_id = utils.add_cookies(data.auth_payload, response)
-            return {"message": "Login Successfully", "status": 202, "data": session_id}
+            utils.add_cookies(data.auth_payload, response)
+            return {"message": "Login Successfully", "status": 202, "data": {}}
         else:
             return {"message": "Wrong Password", "status": 406, "data": {}}
     response.status_code = status.HTTP_406_NOT_ACCEPTABLE
