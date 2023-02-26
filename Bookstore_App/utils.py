@@ -1,7 +1,8 @@
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request,Depends
+from sqlalchemy.orm import Session
 import cryptocode
 import json
-from Bookstore_App import models
+from Bookstore_App import models, database
 
 
 def add_cookies(details, response):
@@ -17,7 +18,7 @@ def get_cookies(request):
     return None
 
 
-def verify_super_user(request, db):
+def verify_super_user(request: Request, db: Session = Depends(database.get_db)):
     decode_cookie = get_cookies(request)
     if decode_cookie:
         user_data = json.loads(decode_cookie)

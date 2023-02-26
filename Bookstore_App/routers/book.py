@@ -7,8 +7,8 @@ routers = APIRouter(tags=["Book"])
 
 
 @routers.post('/addBook')
-def add_book(book: schemas.Book, request: Request, db: Session = Depends(database.get_db)):
-    if utils.verify_super_user(request, db):
+def add_book(book: schemas.Book, user: bool = Depends(utils.verify_super_user), db: Session = Depends(database.get_db)):
+    if user:
         new_book = models.Book(id=book.id,
                                author=book.author,
                                title=book.title,
@@ -31,8 +31,9 @@ def retrieve_books(user: bool = Depends(utils.verify_user), db: Session = Depend
 
 
 @routers.put('/update_book')
-def update_book(id: int, book: schemas.Book, request: Request, db: Session = Depends(database.get_db)):
-    if utils.verify_super_user(request, db):
+def update_book(id: int, book: schemas.Book, user: bool = Depends(utils.verify_super_user),
+                db: Session = Depends(database.get_db)):
+    if user:
         new_data = db.query(models.Book).filter(models.Book.id == id).first()
         new_data.id = book.id,
         new_data.author = book.author,
@@ -49,8 +50,9 @@ def update_book(id: int, book: schemas.Book, request: Request, db: Session = Dep
 
 
 @routers.delete("/delete_book")
-def delete_book(id: int, request: Request, db: Session = Depends(database.get_db)):
-    if utils.verify_super_user(request, db):
+def delete_book(id: int, user: bool = Depends(utils.verify_super_user),
+                db: Session = Depends(database.get_db)):
+    if user:
         try:
             db.query(models.Book).filter(models.Book.id == id).delete()
             db.commit()
