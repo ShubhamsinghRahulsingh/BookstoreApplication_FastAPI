@@ -37,3 +37,9 @@ def user_login(details: schemas.UserLogin, response: Response, db: Session = Dep
     response.status_code = status.HTTP_406_NOT_ACCEPTABLE
     return {"message": "Invalid Credentials", "status": 406, "data": {}}
 
+
+@routers.delete('/log_out')
+def user_logout(request: Request, response: Response):
+    utils.del_cookies(request, response)
+    return {"message": "Logout Successfully", "status": 200, "data": {}}
+

@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends, Response, Request, status, HTTPException
+from fastapi import APIRouter, Depends
 from Bookstore_App import models, schemas, database, utils
-import json
 
 routers = APIRouter(tags=["Book"])
 

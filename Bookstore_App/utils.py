@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Request,Depends
+from fastapi import HTTPException, Request, Depends
 from sqlalchemy.orm import Session
 import cryptocode
 import json
@@ -16,6 +16,14 @@ def get_cookies(request):
     if auth_cred:
         return cryptocode.decrypt(auth_cred, 'secret')
     return None
+
+
+def del_cookies(request, response):
+    auth_cred = request.cookies.get('auth_cred')
+    if auth_cred:
+        response.delete_cookie('auth_cred')
+        return {"message": "Logout Successfully", "status": 200, "data": {}}
+    raise HTTPException(detail='User is not Logged In', status_code=404)
 
 
 def verify_super_user(request: Request, db: Session = Depends(database.get_db)):
