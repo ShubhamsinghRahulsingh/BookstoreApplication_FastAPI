@@ -12,8 +12,7 @@ def add_book(book: schemas.Book, user: bool = Depends(utils.verify_super_user), 
                                author=book.author,
                                title=book.title,
                                price=book.price,
-                               quantity=book.quantity,
-                               user_id=book.user_id
+                               quantity=book.quantity
                                )
         db.add(new_book)
         db.commit()
@@ -38,8 +37,7 @@ def update_book(id: int, book: schemas.Book, user: bool = Depends(utils.verify_s
         new_data.author = book.author,
         new_data.title = book.title,
         new_data.price = book.price,
-        new_data.quantity = book.quantity,
-        new_data.user_id = book.user_id
+        new_data.quantity = book.quantity
 
         db.add(new_data)
         db.commit()

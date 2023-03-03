@@ -38,7 +38,7 @@ def user_login(details: schemas.UserLogin, response: Response, db: Session = Dep
     return {"message": "Invalid Credentials", "status": 406, "data": {}}
 
 
-@routers.delete('/log_out')
+@routers.get('/log_out')
 def user_logout(request: Request, response: Response):
     utils.del_cookies(request, response)
     return {"message": "Logout Successfully", "status": 200, "data": {}}

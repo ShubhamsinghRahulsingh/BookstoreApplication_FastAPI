@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey
    )
 from Bookstore_App.database import Base
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
@@ -21,6 +22,7 @@ class User(Base):
     location = Column(String)
     password = Column(String)
     is_super_user = Column(Boolean, default=False)
+    cart = relationship("Cart", back_populates="user")
 
     @property
     def auth_payload(self):
@@ -35,4 +37,16 @@ class Book(Base):
     title = Column(String(250))
     price = Column(Integer)
     quantity = Column(Integer)
+    cart = relationship("Cart", back_populates="book")
+
+
+class Cart(Base):
+    __tablename__ = "cart"
+
+    id = Column(BigInteger, primary_key=True, index=True)
+    total_price = Column(Integer)
+    book_id = Column(BigInteger, ForeignKey("book.id", ondelete="CASCADE"), nullable=False)
+    book = relationship("Book", back_populates="cart")
     user_id = Column(BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    user = relationship("User", back_populates="cart")
+

@@ -42,3 +42,13 @@ def verify_user(request: Request):
     if decode_cookie:
         return True
     raise HTTPException(detail='User not authorized', status_code=404)
+
+
+def get_user_id(request: Request, db: Session = Depends(database.get_db)):
+    decode_cookie = get_cookies(request)
+    if decode_cookie:
+        user_data = json.loads(decode_cookie)
+        data = db.query(models.User).filter_by(**user_data).one_or_none()
+        userid = data.id
+        return userid
+    raise HTTPException(detail='User is not Logged In', status_code=404)

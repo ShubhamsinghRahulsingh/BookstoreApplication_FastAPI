@@ -39,7 +39,24 @@ class Book(BaseModel):
     title: str
     price: int
     quantity: int
-    user_id: int | None
+
+    class Config:
+        orm_mode = True
+
+
+class Cart(BaseModel):
+    id: int
+    user_id: int
+    book_id: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+
+
+class CartUpdate(BaseModel):
+    quantity: int
+    book_id: int
 
     class Config:
         orm_mode = True
