@@ -1,19 +1,22 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
-from Bookstore_App import models, schemas, database, utils
+from ..models import Book
+from ..schemas import BookValidator
+from ..database import get_db
+from ..utils import verify_super_user, verify_user
 
 routers = APIRouter(tags=["Book"])
 
 
 @routers.post('/addBook')
-def add_book(book: schemas.Book, user: bool = Depends(utils.verify_super_user), db: Session = Depends(database.get_db)):
+def add_book(book: BookValidator, user: bool = Depends(verify_super_user), db: Session = Depends(get_db)):
     if user:
-        new_book = models.Book(id=book.id,
-                               author=book.author,
-                               title=book.title,
-                               price=book.price,
-                               quantity=book.quantity
-                               )
+        new_book = Book(id=book.id,
+                        author=book.author,
+                        title=book.title,
+                        price=book.price,
+                        quantity=book.quantity
+                        )
         db.add(new_book)
         db.commit()
         db.refresh(new_book)
@@ -22,17 +25,17 @@ def add_book(book: schemas.Book, user: bool = Depends(utils.verify_super_user), 
 
 
 @routers.get('/retrieve_books')
-def retrieve_books(user: bool = Depends(utils.verify_user), db: Session = Depends(database.get_db)):
+def retrieve_books(user: bool = Depends(verify_user), db: Session = Depends(get_db)):
     if user:
-        book_data = db.query(models.Book).all()
+        book_data = db.query(Book).all()
         return book_data
 
 
 @routers.put('/update_book')
-def update_book(id: int, book: schemas.Book, user: bool = Depends(utils.verify_super_user),
-                db: Session = Depends(database.get_db)):
+def update_book(id: int, book: BookValidator, user: bool = Depends(verify_super_user),
+                db: Session = Depends(get_db)):
     if user:
-        new_data = db.query(models.Book).filter(models.Book.id == id).first()
+        new_data = db.query(Book).filter(Book.id == id).first()
         new_data.id = book.id,
         new_data.author = book.author,
         new_data.title = book.title,
@@ -47,11 +50,11 @@ def update_book(id: int, book: schemas.Book, user: bool = Depends(utils.verify_s
 
 
 @routers.delete("/delete_book")
-def delete_book(id: int, user: bool = Depends(utils.verify_super_user),
-                db: Session = Depends(database.get_db)):
+def delete_book(id: int, user: bool = Depends(verify_super_user),
+                db: Session = Depends(get_db)):
     if user:
         try:
-            db.query(models.Book).filter(models.Book.id == id).delete()
+            db.query(Book).filter(Book.id == id).delete()
             db.commit()
         except Exception as e:
             raise Exception(e)

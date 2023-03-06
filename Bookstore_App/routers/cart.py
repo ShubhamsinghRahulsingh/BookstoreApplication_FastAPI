@@ -1,13 +1,17 @@
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends
 from Bookstore_App import models, schemas, database, utils
+from ..models import Cart, Book
+from ..schemas import CartValidator, CartUpdate
+from ..database import get_db
+from ..utils import verify_user, get_user_id
 
 routers = APIRouter(tags=["Cart"])
 
 
 @routers.post('/add_cart')
-def add_to_cart(cart: schemas.Cart, user: bool = Depends(utils.verify_user), db: Session = Depends(database.get_db)):
-    book_data = db.query(models.Book).filter(models.Book.id == cart.book_id).first()
+def add_to_cart(cart: CartValidator, user: bool = Depends(verify_user), db: Session = Depends(get_db)):
+    book_data = db.query(Book).filter(Book.id == cart.book_id).first()
     overall_price = book_data.price * cart.quantity
     if user:
         new_cart = models.Cart(id=cart.id,
@@ -23,12 +27,12 @@ def add_to_cart(cart: schemas.Cart, user: bool = Depends(utils.verify_user), db:
 
 
 @routers.get('/retrieve_cart')
-def retrieve_cart(userid: int = Depends(utils.get_user_id), user: bool = Depends(utils.verify_user),
-                  db: Session = Depends(database.get_db)):
+def retrieve_cart(userid: int = Depends(get_user_id), user: bool = Depends(verify_user),
+                  db: Session = Depends(get_db)):
     if user:
-        data = db.query(models.Cart).filter(models.Cart.user_id == userid).all()
+        data = db.query(Cart).filter(Cart.user_id == userid).all()
         books = []
-        values = db.query(models.Book).join(models.Cart).all()
+        values = db.query(Book).join(Cart).all()
         for x in range(len(data)):
             for y in range(len(values)):
                 if values[y].id == data[x].book_id:
@@ -44,13 +48,13 @@ def retrieve_cart(userid: int = Depends(utils.get_user_id), user: bool = Depends
 
 
 @routers.put('/update_cart')
-def update_cart(cart_id: int, cart: schemas.CartUpdate, userid: int = Depends(utils.get_user_id),
-                user: bool = Depends(utils.verify_user),
-                db: Session = Depends(database.get_db)):
-    book_data = db.query(models.Book).filter(models.Book.id == cart.book_id).first()
+def update_cart(cart_id: int, cart: CartUpdate, userid: int = Depends(get_user_id),
+                user: bool = Depends(verify_user),
+                db: Session = Depends(get_db)):
+    book_data = db.query(Book).filter(Book.id == cart.book_id).first()
     overall_price = book_data.price * cart.quantity
     if user:
-        cart_data = db.query(models.Cart).filter(models.Cart.id == cart_id).first()
+        cart_data = db.query(Cart).filter(Cart.id == cart_id).first()
         cart_data.id = cart_id,
         cart_data.total_price = overall_price,
         cart_data.book_id = cart.book_id,
@@ -63,11 +67,11 @@ def update_cart(cart_id: int, cart: schemas.CartUpdate, userid: int = Depends(ut
 
 
 @routers.delete("/delete_cart")
-def delete_cart(id: int, user: bool = Depends(utils.verify_user),
-                db: Session = Depends(database.get_db)):
+def delete_cart(id: int, user: bool = Depends(verify_user),
+                db: Session = Depends(get_db)):
     if user:
         try:
-            db.query(models.Cart).filter(models.Cart.id == id).delete()
+            db.query(Cart).filter(Cart.id == id).delete()
             db.commit()
         except Exception as e:
             raise Exception(e)

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 
 
-class User(BaseModel):
+class UserValidator(BaseModel):
     first_name: str
     last_name: str
     user_name: str
@@ -33,7 +33,7 @@ class UserLogin(BaseModel):
         orm_mode = True
 
 
-class Book(BaseModel):
+class BookValidator(BaseModel):
     id: int | None
     author: str
     title: str
@@ -44,7 +44,7 @@ class Book(BaseModel):
         orm_mode = True
 
 
-class Cart(BaseModel):
+class CartValidator(BaseModel):
     id: int
     user_id: int
     book_id: int
@@ -60,3 +60,7 @@ class CartUpdate(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PlaceOrder(BaseModel):
+    cart_id: int | None
