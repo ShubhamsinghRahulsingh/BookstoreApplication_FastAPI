@@ -51,14 +51,3 @@ class Cart(Base):
     user = relationship("User", back_populates="cart")
 
 
-# class Order(Base):
-#     __tablename__ = "order"
-#
-#     id = Column(BigInteger, primary_key=True, index=True, autoincrement=True)
-#     total_amount = Column(Integer)
-#     user_id = Column(BigInteger, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
-#     user = relationship("User", back_populates="cart")
-#     cart_id = Column(BigInteger, ForeignKey("book.id", ondelete="CASCADE"), nullable=False)
-#     cart = relationship("Cart", back_populates="book")
-#     address = Column(String(500))
-
