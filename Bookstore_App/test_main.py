@@ -15,9 +15,6 @@ engine = create_engine(database_url)
 # Create a SessionLocal class for testing
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create a Base class
-#Base.metadata.create_all(bind=engine)
-
 
 @pytest.fixture()
 def session():
@@ -69,6 +66,16 @@ def user_data(client):
     return response
 
 
+@pytest.fixture()
+def book_data(client):
+    response = client.post("/book/addBook", json={"id": 1,
+                                                  "author": "Nirmala",
+                                                  "title": "Rahasiya",
+                                                  "price": 350,
+                                                  "quantity": 2})
+    return response
+
+
 def test_register_user(client):
     response = client.post("/user/register",
                            json={"first_name": "Manish",
@@ -99,6 +106,41 @@ def test_user_logout(user_data, client):
     response = client.get("/user/log_out")
     assert response.status_code == 200
     assert response.json() == {"message": "Logout Successfully", "status": 200, "data": {}}
+
+
+def test_add_book(user_data, book_data, client):
+    # response = client.post("/book/addBook", json={"id": 1,
+    #                                                 "author": "Nirmala",
+    #                                                 "title": "Rahasiya",
+    #                                                 "price": 350,
+    #                                                 "quantity": 2})
+    response = book_data
+    assert response.status_code == 200
+    assert response.json().get("message") == "Book Added"
+
+
+def test_retrieve_books(user_data, book_data, client):
+    response = client.get("/book/retrieve_books")
+    assert response.status_code == 200
+
+
+def test_update_book(user_data, book_data, client):
+    response = client.put("/book/update_book?id=1", json={"id": 1,
+                                                    "author": "Nirmala",
+                                                    "title": "Rahasiya",
+                                                    "price": 450,
+                                                    "quantity": 2},
+                          )
+    assert response.status_code == 200
+    assert response.json().get("message") == "Book Details Updated"
+
+
+def test_delete_book(user_data, book_data, client):
+    response = client.delete("/book/delete_book?id=1")
+    assert response.status_code == 200
+    assert response.json() == {"delete status": "success"}
+
+
 
 
 
