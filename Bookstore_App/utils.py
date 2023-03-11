@@ -6,6 +6,12 @@ import json
 from .models import User, Cart
 from .schemas import PlaceOrder
 from .database import get_db
+import logging
+
+
+logging.basicConfig(filename='book_store.log', encoding='utf-8', level=logging.DEBUG,
+                    format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+logger = logging.getLogger(__name__)
 
 
 def add_cookies(details, response):

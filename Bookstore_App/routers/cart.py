@@ -1,20 +1,21 @@
 from sqlalchemy.orm import Session
-from fastapi import APIRouter, Depends
-from Bookstore_App import models, schemas, database, utils
+from fastapi import APIRouter, Depends, Response, status
 from ..models import Cart, Book
 from ..schemas import CartValidator, CartUpdate
 from ..database import get_db
-from ..utils import verify_user, get_user_id
+from ..utils import verify_user, get_user_id, logger
 
 routers = APIRouter(tags=["Cart"])
 
 
 @routers.post('/add_cart')
-def add_to_cart(cart: CartValidator, user: bool = Depends(verify_user), db: Session = Depends(get_db)):
+def add_to_cart(cart: CartValidator, response: Response, user: bool = Depends(verify_user), db: Session = Depends(get_db)):
     book_data = db.query(Book).filter(Book.id == cart.book_id).first()
     overall_price = book_data.price * cart.quantity
-    if user:
-        new_cart = models.Cart(id=cart.id,
+    try:
+        if not user:
+            raise Exception("User not authorized")
+        new_cart = Cart(id=cart.id,
                                total_price=overall_price,
                                book_id=cart.book_id,
                                user_id=cart.user_id
@@ -23,7 +24,10 @@ def add_to_cart(cart: CartValidator, user: bool = Depends(verify_user), db: Sess
         db.commit()
         db.refresh(new_cart)
         return {"message": "Cart Added", "status": 201, "data": new_cart}
-    return {"message": "User not authorized", "status": 404, "data": {}}
+    except Exception as ex:
+        logger.exception(ex.args[0])
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {"message": ex.args[0], "status": 406, "data": {}}
 
 
 @routers.get('/retrieve_cart')
@@ -48,12 +52,14 @@ def retrieve_cart(userid: int = Depends(get_user_id), user: bool = Depends(verif
 
 
 @routers.put('/update_cart')
-def update_cart(cart_id: int, cart: CartUpdate, userid: int = Depends(get_user_id),
+def update_cart(cart_id: int, response: Response,  cart: CartUpdate, userid: int = Depends(get_user_id),
                 user: bool = Depends(verify_user),
                 db: Session = Depends(get_db)):
     book_data = db.query(Book).filter(Book.id == cart.book_id).first()
     overall_price = book_data.price * cart.quantity
-    if user:
+    try:
+        if not user:
+            raise Exception("User not authorized")
         cart_data = db.query(Cart).filter(Cart.id == cart_id).first()
         cart_data.id = cart_id,
         cart_data.total_price = overall_price,
@@ -63,17 +69,27 @@ def update_cart(cart_id: int, cart: CartUpdate, userid: int = Depends(get_user_i
         db.commit()
         db.refresh(cart_data)
         return {"message": "Cart Updated", "status": 201, "data": cart_data}
-    return {"message": "User not authorized", "status": 404, "data": {}}
+    except Exception as ex:
+        logger.exception(ex.args[0])
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {"message": ex.args[0], "status": 406, "data": {}}
 
 
 @routers.delete("/delete_cart")
-def delete_cart(id: int, user: bool = Depends(verify_user),
+def delete_cart(id: int, response: Response, user: bool = Depends(verify_user),
                 db: Session = Depends(get_db)):
-    if user:
-        try:
+    try:
+        if not user:
+            raise Exception("User not authorized")
+        value = db.query(Cart).filter(Cart.id == id).first()
+        if value:
             db.query(Cart).filter(Cart.id == id).delete()
             db.commit()
-        except Exception as e:
-            raise Exception(e)
-        return {"delete status": "success"}
-    return {"message": "User not authorized", "status": 404, "data": {}}
+            return {"delete status": "success"}
+        else:
+            return {"message": "Particular Cart Id not found"}
+    except Exception as ex:
+        logger.exception(ex.args[0])
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {"message": ex.args[0], "status": 406, "data": {}}
+
