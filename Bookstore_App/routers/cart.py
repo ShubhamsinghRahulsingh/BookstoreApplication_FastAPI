@@ -93,3 +93,5 @@ def delete_cart(id: int, response: Response, user: bool = Depends(verify_user),
         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
         return {"message": ex.args[0], "status": 406, "data": {}}
 
+
+

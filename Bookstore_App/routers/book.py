@@ -74,3 +74,4 @@ def delete_book(id: int, response: Response, user: bool = Depends(verify_super_u
             response.status_code = status.HTTP_406_NOT_ACCEPTABLE
             return {"message": ex.args[0], "status": 406, "data": {}}
     return {"message": "User not authorized", "status": 404, "data": {}}
+

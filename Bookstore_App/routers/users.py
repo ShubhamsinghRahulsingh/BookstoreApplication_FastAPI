@@ -55,3 +55,4 @@ def user_logout(request: Request, response: Response):
     del_cookies(request, response)
     return {"message": "Logout Successfully", "status": 200, "data": {}}
 
+
