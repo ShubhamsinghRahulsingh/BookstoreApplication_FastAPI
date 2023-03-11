@@ -34,7 +34,6 @@ def session():
 def client(session):
 
     # Dependency override
-
     def override_get_db():
         try:
             yield session
