@@ -158,8 +158,7 @@ def test_retrieve_cart(user_data, book_data, cart_data, client):
 
 
 def test_update_cart(user_data, book_data, cart_data, client):
-    response = client.put("/cart/update_cart?cart_id=1", json={"id": 1,
-                                                    "user_id": 1,
+    response = client.put("/cart/update_cart?cart_id=1", json={
                                                     "book_id": 1,
                                                     "quantity": 2},
                           )
@@ -172,3 +171,8 @@ def test_delete_cart(user_data, book_data, cart_data, client):
     assert response.status_code == 200
     assert response.json() == {"delete status": "success"}
 
+
+def test_place_order(user_data, book_data, cart_data, client):
+    response = client.post("/order/place_order/", json={"cart_id": 1})
+    assert response.status_code == 201
+    assert response.json().get("message") == "Order placed"
