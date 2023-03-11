@@ -76,6 +76,16 @@ def book_data(client):
     return response
 
 
+@pytest.fixture()
+def cart_data(client):
+    response = client.post("/cart/add_cart", json={"id": 1,
+                                                    "user_id": 1,
+                                                    "book_id": 1,
+                                                    "quantity": 1},
+                           )
+    return response
+
+
 def test_register_user(client):
     response = client.post("/user/register",
                            json={"first_name": "Manish",
@@ -109,11 +119,6 @@ def test_user_logout(user_data, client):
 
 
 def test_add_book(user_data, book_data, client):
-    # response = client.post("/book/addBook", json={"id": 1,
-    #                                                 "author": "Nirmala",
-    #                                                 "title": "Rahasiya",
-    #                                                 "price": 350,
-    #                                                 "quantity": 2})
     response = book_data
     assert response.status_code == 200
     assert response.json().get("message") == "Book Added"
@@ -141,13 +146,29 @@ def test_delete_book(user_data, book_data, client):
     assert response.json() == {"delete status": "success"}
 
 
+def test_add_to_cart(user_data, book_data, cart_data, client):
+    response = cart_data
+    assert response.status_code == 200
+    assert response.json().get("message") == "Cart Added"
 
 
+def test_retrieve_cart(user_data, book_data, cart_data, client):
+    response = client.get("/cart/retrieve_cart")
+    assert response.status_code == 200
 
 
+def test_update_cart(user_data, book_data, cart_data, client):
+    response = client.put("/cart/update_cart?cart_id=1", json={"id": 1,
+                                                    "user_id": 1,
+                                                    "book_id": 1,
+                                                    "quantity": 2},
+                          )
+    assert response.status_code == 200
+    assert response.json().get("message") == "Cart Updated"
 
 
-
-
-
+def test_delete_cart(user_data, book_data, cart_data, client):
+    response = client.delete("/cart/delete_cart?id=1")
+    assert response.status_code == 200
+    assert response.json() == {"delete status": "success"}
 
